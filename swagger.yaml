@@ -1,20 +1,18 @@
-swagger: "2.0"
+swagger: '2.0'
+
 info:
-  version: 1.0.0
-  title: "chill-friends"
-  description: A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification
-  termsOfService: http://swagger.io/terms/
+  version: '1.0.0'
+  title: 'Friends'
+  description: 'Microservice for creating friends between users.'
   contact:
-    name: Swagger API Team
-    email: foo@example.com
-    url: http://madskristensen.net
+    name: Jarrod Parkes
+    email: jarrod@udacity.com
+    url: http://jarrodparkes.com
   license:
-    name: MIT
-    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
-host: petstore.swagger.io
-basePath: /api
+    name: MIT License
+    
 schemes:
-  - http
+  - https
 consumes:
   - application/json
 produces:
