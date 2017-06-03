@@ -1,2 +1,2 @@
-# chill-friends
-Friends microservice for Chill app.
+# friends
+Friends microservice.
