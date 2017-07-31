@@ -17,3 +17,89 @@ consumes:
   - application/json
 produces:
   - application/json
+
+paths:
+  /friends:
+    get:
+      description: Returns all friends for the current user.
+      summary: Returns all friends for the current user.
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            type: array
+            items:
+              type: string
+              default: "2"
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+    post:
+      description: Add or remove user from current user's friend list.
+      summary: Adds or remove users from current user's friend list.
+      parameters:
+        - name: friends
+          in: body
+          description: Data for new friends.
+          required: true
+          schema:
+            type: object
+            properties:
+              ids:
+                type: array
+                items:
+                  type: string
+                  default: "2"
+              add:
+                type: boolean
+                default: true
+              remove:
+                type: boolean
+                default: true
+            required:
+              - ids
+      responses:
+        201:
+          description: Resource created.
+          schema:
+            $ref: '#/definitions/Status'
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+
+responses:
+  BadRequest:
+    description: Invalid request.
+    schema:
+      $ref: "#/definitions/Status"
+  NotFound:
+    description: The specified resource was not found.
+    schema:
+      $ref: "#/definitions/Status"
+  Unauthorized:
+    description: Unauthorized.
+    schema:
+      $ref: "#/definitions/Status"
+
+definitions:
+  Status:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: Status code.
+        format: int32
+        default: 1
+      message:
+        type: string
+        description: Status message.
+        default: "Something happened."
+    required:
+      - code
+      - message
