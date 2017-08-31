@@ -2,7 +2,7 @@ swagger: '2.0'
 
 info:
   version: '1.0.0'
-  title: 'Friends'
+  title: 'Friends Microservice'
   description: 'Microservice for creating friends between users.'
   contact:
     name: Jarrod Parkes
@@ -19,87 +19,237 @@ produces:
   - application/json
 
 paths:
-  /friends:
+  /users/friends:
+    delete:
+      description: Remove users from the current user's friend list.
+      summary: Remove users from the current user's friend list.
+      parameters:
+        - name: remove_users
+          in: body
+          description: Users to remove from friend's list.
+          required: true
+          schema:
+            $ref: '#/definitions/RemoveUsers'  
+      responses:
+          204:
+            description: Event deleted.
+            schema:
+              $ref: '#/definitions/Message'
+          304:
+            $ref: "#/responses/NotModified"              
+          400:
+            description: Bad request.
+            schema:
+              $ref: '#/definitions/Message'           
+          401:
+            $ref: "#/responses/Unauthorized"
+      security:
+        - JWT: []             
+  /users/{id}/friends:
     get:
-      description: Returns all friends for the current user.
-      summary: Returns all friends for the current user.
+      description: List a user's friends.
+      summary: List a user's friends.
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch.
+          required: true
+          type: integer
+          format: int64       
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            $ref: '#/definitions/Friends'
+        400:
+          $ref: "#/responses/BadRequest"
+        401:
+          $ref: "#/responses/Unauthorized"
+        404:
+          $ref: "#/responses/NotFound"
+  /users/invites:
+    get:
+      description: List friend invitations for the current user.
+      summary: List friend invitations for the current user.
       responses:
         200:
           description: Successful response.
           schema:
             type: array
             items:
-              type: string
-              default: "2"
-        400:
-          $ref: "#/responses/BadRequest"
+              $ref: '#/definitions/Invitation'
         401:
-          $ref: "#/responses/Unauthorized"
-        404:
-          $ref: "#/responses/NotFound"
+          description: Unauthorized request.
+          schema:
+            $ref: '#/definitions/Message'   
+      security:
+        - JWT: []             
     post:
-      description: Add or remove user from current user's friend list.
-      summary: Adds or remove users from current user's friend list.
+      description: Send friend invitations from the current user.
+      summary: Send friend invitations from the current user.
       parameters:
-        - name: friends
+        - name: invite_users
           in: body
-          description: Data for new friends.
+          description: Users to invite.
           required: true
           schema:
             type: object
             properties:
-              ids:
+              invite_users:
                 type: array
                 items:
                   type: string
                   default: "2"
-              add:
-                type: boolean
-                default: true
-              remove:
-                type: boolean
-                default: true
             required:
               - ids
+      security:
+        - JWT: []               
       responses:
         201:
           description: Resource created.
           schema:
-            $ref: '#/definitions/Status'
+            $ref: '#/definitions/Message'
         400:
           $ref: "#/responses/BadRequest"
         401:
           $ref: "#/responses/Unauthorized"
         404:
           $ref: "#/responses/NotFound"
+  /users/invites/search:
+    get:
+      description: List and filter friend invitations for the current user.
+      summary: List and filter friend invitations for the current user.
+      parameters:
+       - name: filter
+         in: body
+         description: Properties for filtering search.
+         schema:
+           type: object
+           properties:
+            type:
+              type: string
+              description: Type of invitations to filter (inviter|invitee).
+              default: "inviter"
+           required:
+              - type
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Invitation'
+        401:
+          description: Unauthorized request.
+          schema:
+            $ref: '#/definitions/Message'   
+      security:
+        - JWT: []          
+  /users/invites/{id}:
+    put:
+      description: Update a friend invitation for the current user.
+      summary: Update a friend invitation for the current user.
+      parameters:
+        - name: id
+          in: path
+          description: ID of invitation to update.
+          required: true
+          type: integer
+          format: int64 
+        - name: invitation_response
+          in: body
+          description: Response to invitation.
+          required: true
+          schema:
+            type: object
+            properties:
+              accepted:
+                type: boolean
+                default: true
+            required:
+              - accepted          
+      responses:
+        200:
+          description: Invite accepted or declined.
+          schema:
+            $ref: '#/definitions/Message'
+        304:
+          $ref: "#/responses/NotModified"            
+        400:
+          description: Bad request.
+          schema:
+            $ref: '#/definitions/Message'
+        401:
+          $ref: "#/responses/Unauthorized"    
+      security:
+        - JWT: []           
 
 responses:
+  NoContent:
+    description: The request was fulfilled, but nothing to return.
   BadRequest:
     description: Invalid request.
-    schema:
-      $ref: "#/definitions/Status"
+  NotModified:
+    description: The specified resource was not modified.
   NotFound:
     description: The specified resource was not found.
-    schema:
-      $ref: "#/definitions/Status"
   Unauthorized:
     description: Unauthorized.
-    schema:
-      $ref: "#/definitions/Status"
+
+securityDefinitions:
+  JWT:
+    type: apiKey
+    description: A Base64-encoded JSON web token.
+    name: "Authorization: Bearer"
+    in: header
 
 definitions:
-  Status:
+  Friends:
     type: object
     properties:
-      code:
-        type: integer
-        description: Status code.
-        format: int32
-        default: 1
+      friends:
+        type: array
+        description: IDs of users who are on friend's list.
+        readOnly: true
+        items:
+          type: string
+          default: "4"
+    required:
+      - friends
+  Invitation:
+    type: object
+    properties:
+      inviter_user_id:
+        type: string
+        description: IDs of users invited to become friends.
+      invitee_user_id:
+        type: string
+        description: IDs of users invited to become friends.
+    required:
+      - invite_user_id
+      - invitee_user_id
+    default:
+      inviter_user_id: "2"
+      invitee_user_id: "3"
+  RemoveUsers:
+    type: object
+    properties:
+      remove_users:
+        type: array
+        description: IDs of users to remove to friend's list.
+        readOnly: true
+        items:
+          type: string
+          default: "4"
+    required:
+      - remove_users
+  Message:
+    type: object
+    properties:
       message:
         type: string
-        description: Status message.
-        default: "Something happened."
+        description: A message.
     required:
-      - code
       - message
+    example:
+      message: "A message describing the HTTP status code."
