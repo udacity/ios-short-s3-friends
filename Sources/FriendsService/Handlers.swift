@@ -47,4 +47,25 @@ public class Handlers {
 
         try response.send(json: friends!.toJSON()).status(.OK).end()
     }
+
+    public func searchInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    }
+
+    public func getInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    }
+
+    // MARK: POST
+
+    public func postInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    }
+
+    // MARK: PUT
+
+    public func updateInvite(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    }
+
+    // MARK: DELETE
+
+    public func deleteFriend(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    }
 }

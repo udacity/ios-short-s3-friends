@@ -44,17 +44,21 @@ router.options("/*", handler: handlers.getOptions)
 
 // GET
 router.get("/*", middleware: CheckRequestMiddleware(method: .get))
-router.get("/friends", handler: handlers.getFriends)
-router.get("/friends/:id", handler: handlers.getFriends)
+router.get("/users/:id/friends", handler: handlers.getFriends)
+router.get("/users/invites/search", handler: handlers.searchInvites)
+router.get("/users/invites", handler: handlers.getInvites)
 
 // POST
 router.post("/*", middleware: CheckRequestMiddleware(method: .post))
+router.post("/users/invites", handler: handlers.postInvites)
 
 // PUT
 router.put("/*", middleware: CheckRequestMiddleware(method: .put))
+router.put("/users/invites/:id", handler: handlers.updateInvite)
 
 // DELETE
 router.delete("/*", middleware: CheckRequestMiddleware(method: .delete))
+router.delete("/users/friends", handler: handlers.deleteFriend)
 
 // Add an HTTP server and connect it to the router
 Kitura.addHTTPServer(onPort: 8080, with: router)
