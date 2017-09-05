@@ -55,7 +55,17 @@ paths:
           description: ID of user to fetch.
           required: true
           type: integer
-          format: int64       
+          format: int64  
+        - name: page_size
+          in: query
+          description: Number of events returned. Limit is 50.
+          type: integer
+          default: 10
+        - name: page_number
+          in: query
+          description: Page number.
+          type: integer
+          default: 1          
       responses:
         200:
           description: Successful response.
@@ -71,6 +81,17 @@ paths:
     get:
       description: List friend invitations for the current user.
       summary: List friend invitations for the current user.
+      parameters:
+        - name: page_size
+          in: query
+          description: Number of events returned. Limit is 50.
+          type: integer
+          default: 10
+        - name: page_number
+          in: query
+          description: Page number.
+          type: integer
+          default: 1         
       responses:
         200:
           description: Successful response.
@@ -120,6 +141,16 @@ paths:
       description: List and filter friend invitations for the current user.
       summary: List and filter friend invitations for the current user.
       parameters:
+       - name: page_size
+         in: query
+         description: Number of events returned. Limit is 50.
+         type: integer
+         default: 10
+       - name: page_number
+         in: query
+         description: Page number.
+         type: integer
+         default: 1        
        - name: filter
          in: body
          description: Properties for filtering search.
