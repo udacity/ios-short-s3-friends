@@ -27,9 +27,8 @@ DROP TABLE IF EXISTS `friends`;
 
 CREATE TABLE `friends` (
   `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id_1` int(6) unsigned NOT NULL,
-  `user_id_2` int(6) unsigned NOT NULL,
-  `accepted` tinyint(1) DEFAULT NULL,
+  `user_id` int(6) unsigned NOT NULL,
+  `friend_id` int(6) unsigned NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -44,11 +43,42 @@ ALTER TABLE `friends` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 LOCK TABLES `friends` WRITE;
 /*!40000 ALTER TABLE `friends` DISABLE KEYS */;
 INSERT INTO `friends` VALUES
-(1,1,2,1,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(2,1,3,1,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(3,1,4,1,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(4,2,4,0,'2017-07-24 20:43:51','2017-07-24 20:43:51');
+(1,1,2,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(2,1,3,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(3,1,4,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(4,2,4,'2017-07-24 20:43:51','2017-07-24 20:43:51');
 /*!40000 ALTER TABLE `friends` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `friend_invites`
+--
+
+DROP TABLE IF EXISTS `friend_invites`;
+
+CREATE TABLE `friend_invites` (
+  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `inviter_id` int(6) unsigned NOT NULL,
+  `invitee_id` int(6) unsigned NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `friend_invites` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+
+--
+-- Dumping data for table `friend_invites`
+--
+
+LOCK TABLES `friend_invites` WRITE;
+/*!40000 ALTER TABLE `friend_invites` DISABLE KEYS */;
+INSERT INTO `friend_invites` VALUES
+(1,1,2,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(2,1,3,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(3,1,4,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(4,2,4,'2017-07-24 20:43:51','2017-07-24 20:43:51');
+/*!40000 ALTER TABLE `friend_invites` ENABLE KEYS */;
 UNLOCK TABLES;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
