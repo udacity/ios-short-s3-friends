@@ -2,43 +2,43 @@ import MySQL
 import LoggerAPI
 import Foundation
 
-// MARK: - MySQLResultProtocol (Friend)
+// MARK: - MySQLResultProtocol (Invite)
 
 public extension MySQLResultProtocol {
 
-    public func toFriends(pageSize: Int = 10) -> [Friend] {
+    public func toInvites(pageSize: Int = 10) -> [Invite] {
 
-        var friends = [Friend]()
+        var invites = [Invite]()
 
         while case let row? = self.nextResult() {
 
-            var friend = Friend()
+            var invite = Invite()
 
-            friend.id = row["friend_id"] as? Int
-            friend.userID1 = row["user_id_1"] as? String
-            friend.userID2 = row["user_id_2"] as? String
+            invite.id = row["invite_id"] as? Int
+            invite.inviterID = row["inviter_id"] as? String
+            invite.inviteeID = row["invitee_id"] as? String
 
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
             if let createdAtString = row["created_at"] as? String,
                let createdAt = dateFormatter.date(from: createdAtString) {
-                   friend.createdAt = createdAt
+                   invite.createdAt = createdAt
             }
 
             if let updatedAtString = row["updated_at"] as? String,
                let updatedAt = dateFormatter.date(from: updatedAtString) {
-                   friend.updatedAt = updatedAt
+                   invite.updatedAt = updatedAt
             }
 
-            friends.append(friend)
+            invites.append(invite)
 
             // Return collection limited by page size if specified
-            if pageSize > 0 && friends.count == Int(pageSize) {
+            if pageSize > 0 && invites.count == Int(pageSize) {
                 break
             }
         }
 
-        return friends
+        return invites
     }
 }

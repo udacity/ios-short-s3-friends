@@ -56,6 +56,38 @@ public class Handlers {
     }
 
     public func searchInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+
+        guard let body = request.body, case let .json(json) = body, let userID = json["user_id"].string else {
+            Log.error("Cannot initialize request body. This endpoint expects the request body to be a valid JSON object.")
+            try response.send(json: JSON(["message": "Cannot initialize request body. This endpoint expects the request body to be a valid JSON object."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        guard let pageSize = Int(request.queryParameters["page_size"] ?? "10"), let pageNumber = Int(request.queryParameters["page_number"] ?? "1"),
+            pageSize > 0, pageSize <= 50 else {
+            Log.error("Cannot initialize query parameters: page_size, page_number. page_size must be (0, 50].")
+            try response.send(json: JSON(["message": "Cannot initialize query parameters: page_size, page_number. page_size must be (0, 50]."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        guard let filterType = request.queryParameters["type"], let type = InviteType(rawValue: filterType) else {
+            Log.error("Cannot initialize query parameter: type. type must be upcoming, past, or all.")
+            try response.send(json: JSON(["message": "Cannot initialize query parameter: type. type must be upcoming, past, or all."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        // FIXME: Use userID from JWT
+        let invites = try dataAccessor.getInvites(forUserID: userID, pageSize: pageSize, pageNumber: pageNumber, type: type)
+
+        if invites == nil {
+            try response.status(.notFound).end()
+            return
+        }
+
+        try response.send(json: invites!.toJSON()).status(.OK).end()
     }
 
     public func getInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {

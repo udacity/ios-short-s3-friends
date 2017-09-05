@@ -2,26 +2,32 @@ import Foundation
 import SwiftyJSON
 import LoggerAPI
 
-// MARK: - Friend
+// MARK: - InviteType
 
-public struct Friend {
+public enum InviteType: String {
+    case inviter, invitee
+}
+
+// MARK: - Invite
+
+public struct Invite {
     public var id: Int?
-    public var userID1: String?
-    public var userID2: String?
+    public var inviterID: String?
+    public var inviteeID: String?
     public var createdAt: Date?
     public var updatedAt: Date?
 }
 
-// MARK: - Friend: JSONAble
+// MARK: - Invite: JSONAble
 
-extension Friend: JSONAble {
+extension Invite: JSONAble {
     public func toJSON() -> JSON {
         var dict = [String: Any]()
         let nilValue: Any? = nil
 
-        dict["friend_id"] = id != nil ? id : nilValue
-        dict["user_id_1"] = userID1 != nil ? userID1 : nilValue
-        dict["user_id_2"] = userID2 != nil ? userID2 : nilValue
+        dict["id"] = id != nil ? id : nilValue
+        dict["inviter_id"] = inviterID != nil ? inviterID : nilValue
+        dict["invitee_id"] = inviteeID != nil ? inviteeID : nilValue
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"

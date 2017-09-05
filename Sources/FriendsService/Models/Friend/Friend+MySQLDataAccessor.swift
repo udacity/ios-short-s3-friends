@@ -5,6 +5,7 @@ import LoggerAPI
 
 public protocol FriendMySQLDataAccessorProtocol {
     func getFriends(withUserID id: String, pageSize: Int, pageNumber: Int) throws -> [Friend]?
+    func getInvites(forUserID id: String, pageSize: Int, pageNumber: Int, type: InviteType) throws -> [Invite]?
 }
 
 // MARK: - FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol
@@ -21,18 +22,36 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
         self.pool = pool
     }
 
-    // MARK: Queries
+    // MARK: READ
 
     public func getFriends(withUserID id: String, pageSize: Int = 10, pageNumber: Int = 1) throws -> [Friend]? {
         let selectQuery = MySQLQueryBuilder()
-            .select(fields: ["friend_id", "current_user_id", "friend_user_id"], table: "friends")
-            .wheres(statement: "current_user_id=?", parameters: id)
-        
+            .select(fields: ["friend_id", "user_id_1", "user_id_2"], table: "friends")
+            .wheres(statement: "user_id_1=? OR user_id_2=?", parameters: id, id)
+
         let result = try execute(builder: selectQuery)
         result.seek(offset: cacluateOffset(pageSize: pageSize, pageNumber: pageNumber))
 
         let friends = result.toFriends(pageSize: pageSize)
         return (friends.count == 0) ? nil : friends
+    }
+
+    public func getInvites(forUserID id: String, pageSize: Int = 10, pageNumber: Int = 1, type: InviteType) throws -> [Invite]? {
+        // Use schedule type to create proper query
+        var selectInvites = MySQLQueryBuilder()
+            .select(fields: ["invite_id", "inviter_id", "invitee_id"], table: "friend_invites")
+        switch type {
+        case .inviter:
+            selectInvites = selectInvites.wheres(statement: "inviter_id=?", parameters: id)
+        case .invitee:
+            selectInvites = selectInvites.wheres(statement: "invitee_id=?", parameters: id)
+        }
+        
+        let result = try execute(builder: selectInvites)
+        result.seek(offset: cacluateOffset(pageSize: pageSize, pageNumber: pageNumber))
+
+        let invites = result.toInvites(pageSize: pageSize)
+        return (invites.count == 0) ? nil : invites
     }
 
     // MARK: Utility

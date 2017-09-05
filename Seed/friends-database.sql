@@ -27,8 +27,8 @@ DROP TABLE IF EXISTS `friends`;
 
 CREATE TABLE `friends` (
   `friend_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `current_user_id` int(6) unsigned NOT NULL,
-  `friend_user_id` int(6) unsigned NOT NULL,
+  `user_id_1` varchar(50) NOT NULL,
+  `user_id_2` varchar(50) NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`friend_id`)
@@ -43,10 +43,10 @@ ALTER TABLE `friends` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 LOCK TABLES `friends` WRITE;
 /*!40000 ALTER TABLE `friends` DISABLE KEYS */;
 INSERT INTO `friends` VALUES
-(1,1,2,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(2,1,3,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(3,1,4,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(4,2,4,'2017-07-24 20:43:51','2017-07-24 20:43:51');
+(1,'1','2','2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(2,'3','1','2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(3,'1','4','2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(4,'4','2','2017-07-24 20:43:51','2017-07-24 20:43:51');
 /*!40000 ALTER TABLE `friends` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -57,12 +57,12 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `friend_invites`;
 
 CREATE TABLE `friend_invites` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `inviter_id` int(6) unsigned NOT NULL,
-  `invitee_id` int(6) unsigned NOT NULL,
+  `invite_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `inviter_id` varchar(50) NOT NULL,
+  `invitee_id` varchar(50) NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`invite_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `friend_invites` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
@@ -74,10 +74,8 @@ ALTER TABLE `friend_invites` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bi
 LOCK TABLES `friend_invites` WRITE;
 /*!40000 ALTER TABLE `friend_invites` DISABLE KEYS */;
 INSERT INTO `friend_invites` VALUES
-(1,1,2,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(2,1,3,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(3,1,4,'2017-07-24 20:43:51','2017-07-24 20:43:51'),
-(4,2,4,'2017-07-24 20:43:51','2017-07-24 20:43:51');
+(1,'3','2','2017-07-24 20:43:51','2017-07-24 20:43:51'),
+(2,'4','3','2017-07-24 20:43:51','2017-07-24 20:43:51');
 /*!40000 ALTER TABLE `friend_invites` ENABLE KEYS */;
 UNLOCK TABLES;
 
