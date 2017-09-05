@@ -6,7 +6,7 @@ import Foundation
 
 public extension MySQLResultProtocol {
 
-    public func toFriends() -> [Friend] {
+    public func toFriends(pageSize: Int = 10) -> [Friend] {
 
         var friends = [Friend]()
 
@@ -14,10 +14,9 @@ public extension MySQLResultProtocol {
 
             var friend = Friend()
 
-            friend.id = row["id"] as? Int
-            friend.userID1 = row["user_id_1"] as? Int
-            friend.userID2 = row["user_id_2"] as? Int
-            friend.accepted = row["accepted"] as? Int
+            friend.id = row["friend_id"] as? Int
+            friend.userID = row["current_user_id"] as? Int
+            friend.friendID = row["friend_user_id"] as? Int
 
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -33,6 +32,11 @@ public extension MySQLResultProtocol {
             }
 
             friends.append(friend)
+
+            // Return collection limited by page size if specified
+            if pageSize > 0 && friends.count == Int(pageSize) {
+                break
+            }
         }
 
         return friends

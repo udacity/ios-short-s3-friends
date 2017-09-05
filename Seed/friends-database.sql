@@ -26,12 +26,12 @@ ALTER DATABASE `game_night` CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 DROP TABLE IF EXISTS `friends`;
 
 CREATE TABLE `friends` (
-  `id` int(6) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(6) unsigned NOT NULL,
-  `friend_id` int(6) unsigned NOT NULL,
+  `friend_id` int(6) unsigned NOT NULL AUTO_INCREMENT,
+  `current_user_id` int(6) unsigned NOT NULL,
+  `friend_user_id` int(6) unsigned NOT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`friend_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `friends` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;

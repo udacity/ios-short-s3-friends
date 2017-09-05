@@ -30,15 +30,22 @@ public class Handlers {
 
     public func getFriends(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
 
-        let id = request.parameters["id"]
-
-        var friends: [Friend]?
-
-        if let id = id {
-            friends = try dataAccessor.getFriends(withID: id)
-        } else {
-            friends = try dataAccessor.getFriends()
+        guard let pageSize = Int(request.queryParameters["page_size"] ?? "10"), let pageNumber = Int(request.queryParameters["page_number"] ?? "1"),
+            pageSize > 0, pageSize <= 50 else {
+            Log.error("Cannot initialize query parameters: page_size, page_number. page_size must be (0, 50].")
+            try response.send(json: JSON(["message": "Cannot initialize query parameters: page_size, page_number. page_size must be (0, 50]."]))
+                        .status(.badRequest).end()
+            return
         }
+
+        guard let id = request.parameters["id"] else {
+            Log.error("Cannot initialize path parameter: id.")
+            try response.send(json: JSON(["message": "Cannot initialize path parameter: id."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        let friends = try dataAccessor.getFriends(withUserID: id, pageSize: pageSize, pageNumber: pageNumber)
 
         if friends == nil {
             try response.status(.notFound).end()

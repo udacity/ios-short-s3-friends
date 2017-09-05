@@ -1,10 +1,10 @@
 import MySQL
+import LoggerAPI
 
 // MARK: - FriendMySQLDataAccessorProtocol
 
 public protocol FriendMySQLDataAccessorProtocol {
-    func getFriends(withID id: String) throws -> [Friend]?
-    func getFriends() throws -> [Friend]?
+    func getFriends(withUserID id: String, pageSize: Int, pageNumber: Int) throws -> [Friend]?
 }
 
 // MARK: - FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol
@@ -15,10 +15,6 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
 
     let pool: MySQLConnectionPoolProtocol
 
-    let selectFriends = MySQLQueryBuilder()
-            .select(fields: ["id", "user_id_1", "user_id_2",
-            "accepted", "created_at", "updated_at"], table: "friends")
-
     // MARK: Initializer
 
     public init(pool: MySQLConnectionPoolProtocol) {
@@ -27,18 +23,15 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
 
     // MARK: Queries
 
-    public func getFriends(withID id: String) throws -> [Friend]? {
-        let query = "SELECT * " +
-                    "FROM friends " +
-                    "WHERE id=\(id)"
-        let result = try execute(query: query)
-        let friends = result.toFriends()
-        return (friends.count == 0) ? nil : friends
-    }
+    public func getFriends(withUserID id: String, pageSize: Int = 10, pageNumber: Int = 1) throws -> [Friend]? {
+        let selectQuery = MySQLQueryBuilder()
+            .select(fields: ["friend_id", "current_user_id", "friend_user_id"], table: "friends")
+            .wheres(statement: "current_user_id=?", parameters: id)
+        
+        let result = try execute(builder: selectQuery)
+        result.seek(offset: cacluateOffset(pageSize: pageSize, pageNumber: pageNumber))
 
-    public func getFriends() throws -> [Friend]? {
-        let result = try execute(builder: selectFriends)
-        let friends = result.toFriends()
+        let friends = result.toFriends(pageSize: pageSize)
         return (friends.count == 0) ? nil : friends
     }
 
@@ -51,11 +44,8 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
         return try connection!.execute(builder: builder)
     }
 
-    func execute(query: String) throws -> MySQLResultProtocol {
-        let connection = try pool.getConnection()
-        defer { pool.releaseConnection(connection!) }
-
-        return try connection!.execute(query: query)
+    func cacluateOffset(pageSize: Int, pageNumber: Int) -> Int64 {
+        return Int64(pageNumber > 1 ? pageSize * (pageNumber - 1) : 0)
     }
 
     public func isConnected() -> Bool {
