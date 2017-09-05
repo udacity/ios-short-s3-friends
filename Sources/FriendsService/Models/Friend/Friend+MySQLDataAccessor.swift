@@ -45,8 +45,10 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
             selectInvites = selectInvites.wheres(statement: "inviter_id=?", parameters: id)
         case .invitee:
             selectInvites = selectInvites.wheres(statement: "invitee_id=?", parameters: id)
+        case .all:
+            selectInvites = selectInvites.wheres(statement: "invitee_id=? OR inviter_id=?", parameters: id, id)
         }
-        
+
         let result = try execute(builder: selectInvites)
         result.seek(offset: cacluateOffset(pageSize: pageSize, pageNumber: pageNumber))
 

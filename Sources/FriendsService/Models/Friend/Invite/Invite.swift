@@ -5,7 +5,7 @@ import LoggerAPI
 // MARK: - InviteType
 
 public enum InviteType: String {
-    case inviter, invitee
+    case inviter, invitee, all
 }
 
 // MARK: - Invite
