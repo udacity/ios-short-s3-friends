@@ -70,7 +70,9 @@ paths:
         200:
           description: Successful response.
           schema:
-            $ref: '#/definitions/Friends'
+            type: array
+            items:
+              $ref: '#/definitions/Friends'
         400:
           $ref: "#/responses/BadRequest"
         401:
@@ -238,15 +240,22 @@ definitions:
   Friends:
     type: object
     properties:
-      friends:
-        type: array
-        description: IDs of users who are on friend's list.
-        readOnly: true
-        items:
-          type: string
-          default: "4"
+      friend_id:
+        type: string
+        description: ID of friend record.
+        default: "1"
+      user_id:
+        type: string
+        description: ID of user.
+        default: "2"
+      friend_user_id:
+        type: string
+        description: ID of befriended user.
+        default: "3"
     required:
-      - friends
+      - friend_id
+      - user_id
+      - friend_user_id
   Invitation:
     type: object
     properties:
