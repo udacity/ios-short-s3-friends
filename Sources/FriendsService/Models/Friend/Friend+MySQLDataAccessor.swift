@@ -57,4 +57,14 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
 
         return try connection!.execute(query: query)
     }
+
+    public func isConnected() -> Bool {
+        do {
+            let connection = try pool.getConnection()
+            defer { pool.releaseConnection(connection!) }
+        } catch {
+            return false
+        }
+        return true
+    }
 }
