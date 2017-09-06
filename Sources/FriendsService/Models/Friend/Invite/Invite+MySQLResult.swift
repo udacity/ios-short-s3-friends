@@ -14,7 +14,7 @@ public extension MySQLResultProtocol {
 
             var invite = Invite()
 
-            invite.id = row["invite_id"] as? Int
+            invite.inviteID = row["invite_id"] as? Int
             invite.inviterID = row["inviter_id"] as? String
             invite.inviteeID = row["invitee_id"] as? String
 

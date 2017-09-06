@@ -163,6 +163,36 @@ public class Handlers {
     // MARK: PUT
 
     public func updateInvite(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        // FIXME: Only allow for updating an invite if JWT user matches the invitee.
+        guard let id = request.parameters["id"] else {
+            Log.error("Cannot initialize path parameter: id.")
+            try response.send(json: JSON(["message": "Cannot initialize path parameter: id."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        guard let body = request.body, case let .json(json) = body else {
+            Log.error("Cannot initialize request body. This endpoint expects the request body to be a valid JSON object.")
+            try response.send(json: JSON(["message": "Cannot initialize request body. This endpoint expects the request body to be a valid JSON object."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        guard let accepted = json["accepted"].bool else {
+            Log.error("Cannot initialize body parameters: accepted. accepted is a boolean value.")
+            try response.send(json: JSON(["message": "Cannot initialize body parameters: accepted. accepted is a boolean value."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        let success = try dataAccessor.updateInvite(id: id, accepted: accepted)
+
+        if success {
+            try response.send(json: JSON(["message": "Invite successfully \(accepted ? "accepted" : "declined")."])).status(.OK).end()
+            return
+        }
+
+        try response.status(.notModified).end()
     }
 
     // MARK: DELETE

@@ -7,6 +7,7 @@ public protocol FriendMySQLDataAccessorProtocol {
     func getFriends(withUserID id: String, pageSize: Int, pageNumber: Int) throws -> [Friend]?
     func getInvites(forUserID id: String, pageSize: Int, pageNumber: Int, type: InviteType) throws -> [Invite]?
     func createInvites(forUserID userID: String, inviteUserIDs: [String]) throws -> Bool
+    func updateInvite(id: String, accepted: Bool) throws -> Bool
     func deleteFriends(friendIDs: [String]) throws -> Bool
 }
 
@@ -39,7 +40,7 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
     }
 
     public func getInvites(forUserID id: String, pageSize: Int = 10, pageNumber: Int = 1, type: InviteType) throws -> [Invite]? {
-        // Use schedule type to create proper query
+        // Use invite type to create proper query
         var selectInvites = MySQLQueryBuilder()
             .select(fields: ["invite_id", "inviter_id", "invitee_id"], table: "friend_invites")
         switch type {
@@ -80,7 +81,6 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
 
         do {
             for inviteUserID in inviteUserIDs {
-
                 // Check if friend already exists
                 let checkFriendQuery = MySQLQueryBuilder()
                     .select(fields: ["friend_id"], table: "friends")
@@ -89,7 +89,6 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
                 guard result.nextResult() == nil else {
                     return rollbackEventTransaction(withConnection: connection, message: "User \(userID) is already a friend with user \(inviteUserID).")
                 }
-
                 // Check if invite already exists
                 let checkInviteQuery = MySQLQueryBuilder()
                     .select(fields: ["inviter_id"], table: "friend_invites")
@@ -98,13 +97,12 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
                 guard result.nextResult() == nil else {
                     return rollbackEventTransaction(withConnection: connection, message: "User \(userID) has already invited user \(inviteUserID) to become friends.")
                 }
-
                 // Insert (create) invite
                 let insertInviteQuery = MySQLQueryBuilder()
                     .insert(data: ["inviter_id": userID, "invitee_id": inviteUserID], table: "friend_invites")
-                result = try connection.execute(builder: insertInviteQuery)                
+                result = try connection.execute(builder: insertInviteQuery)
                 if result.affectedRows < 1 {
-                    return rollbackEventTransaction(withConnection: connection, message: "Failed to invite user \(inviteUserID) to become a friend of \(userID)")
+                    return rollbackEventTransaction(withConnection: connection, message: "Failed to invite user \(inviteUserID) to become a friend of \(userID).")
                 }
             }
 
@@ -112,6 +110,68 @@ public class FriendMySQLDataAccessor: FriendMySQLDataAccessorProtocol {
 
         } catch {
             return rollbackEventTransaction(withConnection: connection, message: "createInvites failed")
+        }
+
+        return true
+    }
+
+    // MARK: UPDATE
+
+    public func updateInvite(id: String, accepted: Bool) throws -> Bool {
+        var result: MySQLResultProtocol
+
+        guard let connection = try pool.getConnection() else {
+            Log.error("Could not get a connection")
+            return false
+        }
+        defer { pool.releaseConnection(connection) }
+
+        func rollbackEventTransaction(withConnection: MySQLConnectionProtocol, message: String) -> Bool {
+            Log.error("Could not update invite: \(message)")
+            try! connection.rollbackTransaction()
+            return false
+        }
+
+        connection.startTransaction()
+
+        // FIXME: Only allow for updating an invite if JWT user matches the invitee.
+        do {
+            // Select existing invite
+            let selectInviteQuery = MySQLQueryBuilder()
+                .select(fields: ["invite_id", "inviter_id", "invitee_id"], table: "friend_invites")
+                .wheres(statement: "invite_id=?", parameters: id)
+            Log.info(selectInviteQuery.build())
+            result = try connection.execute(builder: selectInviteQuery)
+            let existingInvites = result.toInvites()
+            guard existingInvites.count == 1 else {
+                return rollbackEventTransaction(withConnection: connection, message: "Invite does not exist.")
+            }
+
+            // Delete invite
+            let deleteInviteQuery = MySQLQueryBuilder()
+                .delete(fromTable: "friend_invites")
+                .wheres(statement: "invite_id=?", parameters: id)
+            Log.info(deleteInviteQuery.build())
+            result = try connection.execute(builder: deleteInviteQuery)
+            if result.affectedRows < 1 {
+                return rollbackEventTransaction(withConnection: connection, message: "Failed to delete invite.")
+            }
+
+            // Add friend record
+            if accepted {
+                let insertFriendQuery = MySQLQueryBuilder()
+                    .insert(data: ["user_id_1": "\(existingInvites[0].inviterID!)", "user_id_2": "\(existingInvites[0].inviteeID!)"], table: "friends")
+                Log.info(insertFriendQuery.build())
+                result = try connection.execute(builder: insertFriendQuery)
+                if result.affectedRows < 1 {
+                    return rollbackEventTransaction(withConnection: connection, message: "Failed to accept invite \(existingInvites[0]).")
+                }
+            }
+
+            try connection.commitTransaction()
+
+        } catch {
+            return rollbackEventTransaction(withConnection: connection, message: "updateInvite failed")
         }
 
         return true
