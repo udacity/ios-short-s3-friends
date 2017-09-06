@@ -121,6 +121,43 @@ public class Handlers {
     // MARK: POST
 
     public func postInvites(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+
+        // FIXME: Post invites from user in JWT
+        guard let body = request.body, case let .json(json) = body, let userID = json["user_id"].string else {
+            Log.error("Cannot initialize request body. This endpoint expects the request body to be a valid JSON object.")
+            try response.send(json: JSON(["message": "Cannot initialize request body. This endpoint expects the request body to be a valid JSON object."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        guard let userIDsJSON = json["user_ids"].array else {
+            Log.error("Cannot initialize body parameters: user_ids. user_ids is a JSON array of strings (used ids) for sending friend requests.")
+            try response.send(json: JSON(["message": "Cannot initialize body parameters: user_ids. user_ids is a JSON array of strings (used ids) for sending friend requests."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        var inviteeIDs: [String] = []
+        for userIDJSON in userIDsJSON {
+            if let userID = userIDJSON.string {
+                inviteeIDs.append(userID)
+            }
+        }
+        guard inviteeIDs.count > 0 else {
+            Log.error("Cannot initialize body parameters: user_ids. user_ids is a JSON array of strings (used ids) for sending friend requests.")
+            try response.send(json: JSON(["message": "Cannot initialize body parameters: user_ids. user_ids is a JSON array of strings (used ids) for sending friend requests."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        let success = try dataAccessor.createInvites(forUserID: userID, inviteUserIDs: inviteeIDs)
+
+        if success {
+            try response.send(json: JSON(["message": "Friend invites sent."])).status(.created).end()
+            return
+        }
+
+        try response.status(.notModified).end()
     }
 
     // MARK: PUT
@@ -130,9 +167,42 @@ public class Handlers {
 
     // MARK: DELETE
 
-    public func deleteFriend(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    public func deleteFriends(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
 
-        
+        guard let body = request.body, case let .json(json) = body else {
+            Log.error("Cannot initialize request body. This endpoint expects the request body to be a valid JSON object.")
+            try response.send(json: JSON(["message": "Cannot initialize request body. This endpoint expects the request body to be a valid JSON object."]))
+                        .status(.badRequest).end()
+            return
+        }
 
+        guard let removeFriendIDsJSON = json["friend_ids"].array else {
+            Log.error("Cannot initialize body parameters: friend_ids. friend_ids is a JSON array of strings (friend ids) to remove.")
+            try response.send(json: JSON(["message": "Cannot initialize body parameters: friend_ids. friend_ids is a JSON array of strings (friend ids) to remove."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        var friendIDs: [String] = []
+        for removeFriendIDJSON in removeFriendIDsJSON {
+            if let friendID = removeFriendIDJSON.string {
+                friendIDs.append(friendID)
+            }
+        }
+        guard friendIDs.count > 0 else {
+            Log.error("Cannot initialize body parameters: friend_ids. friend_ids is a JSON array of strings (friend ids) to remove.")
+            try response.send(json: JSON(["message": "Cannot initialize body parameters: friend_ids. friend_ids is a JSON array of strings (friend ids) to remove."]))
+                        .status(.badRequest).end()
+            return
+        }
+
+        let success = try dataAccessor.deleteFriends(friendIDs: friendIDs)
+
+        if success {
+            try response.send(json: JSON(["message": "Friends deleted."])).status(.noContent).end()
+            return
+        }
+
+        try response.status(.notModified).end()
     }
 }

@@ -58,7 +58,7 @@ router.put("/users/invites/:id", handler: handlers.updateInvite)
 
 // DELETE
 router.delete("/*", middleware: CheckRequestMiddleware(method: .delete))
-router.delete("/users/friends", handler: handlers.deleteFriend)
+router.delete("/users/friends", handler: handlers.deleteFriends)
 
 // Add an HTTP server and connect it to the router
 Kitura.addHTTPServer(onPort: 8080, with: router)
