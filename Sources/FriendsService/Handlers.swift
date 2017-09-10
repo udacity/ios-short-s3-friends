@@ -163,6 +163,7 @@ public class Handlers {
     // MARK: PUT
 
     public func updateInvite(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+
         // FIXME: Only allow for updating an invite if JWT user matches the invitee.
         guard let id = request.parameters["id"] else {
             Log.error("Cannot initialize path parameter: id.")
