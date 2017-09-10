@@ -24,7 +24,7 @@ paths:
       description: Remove users from the current user's friend list.
       summary: Remove users from the current user's friend list.
       parameters:
-        - name: remove_users
+        - name: friend_ids
           in: body
           description: Users to remove from friend's list.
           required: true
@@ -93,7 +93,7 @@ paths:
           in: query
           description: Page number.
           type: integer
-          default: 1         
+          default: 1
       responses:
         200:
           description: Successful response.
@@ -111,20 +111,20 @@ paths:
       description: Send friend invitations from the current user.
       summary: Send friend invitations from the current user.
       parameters:
-        - name: invite_users
+        - name: filter
           in: body
           description: Users to invite.
           required: true
           schema:
             type: object
             properties:
-              invite_users:
+              user_ids:
                 type: array
                 items:
                   type: string
                   default: "2"
             required:
-              - ids
+              - user_ids
       security:
         - JWT: []               
       responses:
@@ -152,19 +152,12 @@ paths:
          in: query
          description: Page number.
          type: integer
-         default: 1        
-       - name: filter
-         in: body
-         description: Properties for filtering search.
-         schema:
-           type: object
-           properties:
-            type:
-              type: string
-              description: Type of invitations to filter (inviter|invitee).
-              default: "inviter"
-           required:
-              - type
+         default: 1
+       - name: type
+         in: query
+         description: Type of invitations to filter (inviter|invitee|all).
+         type: string
+         default: "all"         
       responses:
         200:
           description: Successful response.
@@ -274,7 +267,7 @@ definitions:
   RemoveUsers:
     type: object
     properties:
-      remove_users:
+      friend_ids:
         type: array
         description: IDs of users to remove to friend's list.
         readOnly: true
@@ -282,7 +275,7 @@ definitions:
           type: string
           default: "4"
     required:
-      - remove_users
+      - friend_ids
   Message:
     type: object
     properties:
